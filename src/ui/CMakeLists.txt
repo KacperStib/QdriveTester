@@ -1,0 +1,8 @@
+SET(SOURCES ui_Prog.c
+    ui_Params.c
+    ui_Manual.c
+    ui.c
+    ui_comp_hook.c
+    ui_helpers.c)
+
+add_library(ui ${SOURCES})

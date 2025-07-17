@@ -1,0 +1,28 @@
+#define BUZZER 5
+#define RELAY 13
+
+#define BROADCAST_ADDR 0x00
+#define SLAVE_ADDR 0x03
+
+#define REG_MCU_COMMAND 1
+
+#define REG_CH1_POWER 2
+#define REG_CH2_POWER 3
+#define REG_CH3_POWER 4
+
+#define REG_CH1_CURRENT 5
+#define REG_CH2_CURRENT 6
+#define REG_CH3_CURRENT 7
+
+#define REG_CH1_VLED 20
+#define REG_CH2_VLED 21
+#define REG_CH3_VLED 22
+#define REG_CH1_ILED 23
+#define REG_CH2_ILED 24
+#define REG_CH3_ILED 25
+#define REG_CH1_TLED 26
+#define REG_CH2_TLED 27
+#define REG_CH3_TLED 28
+
+#define DEFAULT_CURRENT 40
+#define TEST_CURRENT 155

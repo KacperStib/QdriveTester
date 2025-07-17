@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "wire.h": "c",
+        "ui.h": "c",
+        "images.h": "c",
+        "screens.h": "c",
+        "actions.h": "c",
+        "vars.h": "c",
+        "styles.h": "c",
+        "string.h": "c",
+        "fonts.h": "c"
+    }
+}
