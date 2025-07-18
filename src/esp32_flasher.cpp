@@ -1,5 +1,6 @@
 #include "esp32_flasher.h"
 
+char buf[100];
 /**
    Calculate timeout based on data size
    @param size_bytes: Size of data in bytes
@@ -353,8 +354,12 @@ int ESP32Flasher::flashBeginCmd(uint32_t offset,
   int response = verifyResponse(FLASH_BEGIN);
   if (response == SUCCESS) {
     Serial.println("[INFO] Flash begin command accepted");
+    sprintf(buf, "Rozpoczynanie programowania ");
+    lv_label_set_text(ui_Label, buf);
   } else {
     Serial.printf("[ERROR] Flash begin command failed with error: %d\n", response);
+    sprintf(buf, "Nie udalo sie rozpoczac programowania");
+    lv_label_set_text(ui_Label, buf);
   }
 
   Serial.println("================================================\n");
@@ -586,6 +591,8 @@ bool ESP32Flasher::espConnect(void) {
       Serial.printf("[WARN] Sync timeout on attempt %d\n", (MAX_TRIALS - trials + 1));
       if (--trials == 0) {
         Serial.println("[ERROR] All sync attempts failed - connection failed");
+        sprintf(buf, "Brak synchornizacji");
+        lv_label_set_text(ui_Label, buf);
         return ERR_TIMEOUT_flash;
       }
       delay(100);
@@ -648,6 +655,8 @@ int ESP32Flasher::espFlashStart(uint32_t flash_address, uint32_t image_size, uin
     Serial.println("[INFO] Flash initialization successful");
   } else {
     Serial.printf("[ERROR] Flash initialization failed with error: %d\n", result);
+    sprintf(buf, "Błąd inizcjalizacji flashowania");
+    lv_label_set_text(ui_Label, buf);
   }
 
   Serial.println("================================================\n");
@@ -721,7 +730,9 @@ void ESP32Flasher::espFlashBinFile(const char* bin_file_name) {
   Serial.println("\n[INFO] ========== Starting Binary File Flash Process ==========");
   Serial.println("[WARN] Do not interrupt the flashing process!");
   Serial.printf("[INFO] Attempting to flash file: %s\n", bin_file_name);
-
+  // Wyswietlacz
+  sprintf(buf, "Rozpoczynanie programowania");
+  lv_label_set_text(ui_Label, buf);
   if (SPIFFS.exists(bin_file_name)) {
     File file_read = SPIFFS.open(bin_file_name, FILE_READ);
     size_t size = file_read.size();
@@ -738,6 +749,9 @@ void ESP32Flasher::espFlashBinFile(const char* bin_file_name) {
     file_read.close();
   } else {
     Serial.printf("[ERROR] File %s not found in SPIFFS\n", bin_file_name);
+    // Wyswietlacz
+    sprintf(buf, "Nie znaleziono programu");
+    lv_label_set_text(ui_Label, buf);
   }
 
   // Reset ESP32
@@ -768,6 +782,9 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
   int flash_start_status = espFlashStart(address, size, sizeof(payload));
   if (flash_start_status != SUCCESS) {
     Serial.printf("[ERROR] Flash erase failed with error: %d\n", flash_start_status);
+    // Wyswietlacz
+    sprintf(buf, "Nie udalo sie wykasowac pamieci flash");
+    lv_label_set_text(ui_Label, buf);
     return flash_start_status;
   }
 
@@ -790,6 +807,9 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
     if (flash_start_status != SUCCESS) {
       Serial.printf("[ERROR] Flash write failed at offset 0x%X with error: %d\n",
                     written, flash_start_status);
+      // Wyswietlacz
+      sprintf(buf, "Nie udalo sie zaprogramowac");
+      lv_label_set_text(ui_Label, buf);
       return flash_start_status;
     }
 
@@ -802,12 +822,18 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
     if (previousProgress != progress) {
       previousProgress = progress;
       Serial.printf("[INFO] Programming progress: %d%%\n", progress);
+      // Wyswietlacz
       lv_bar_set_value(ui_ProgBar, progress, LV_ANIM_OFF);
+      sprintf(buf, "Postep programowania: %d %", progress);
+      lv_label_set_text(ui_Label, buf);
     }
   }
 
   Serial.println("[INFO] Programming complete!");
   Serial.println("================================================\n");
+  // Wyswietlaccz
+  sprintf(buf, "Pomyslnie zaprogramowano");
+  lv_label_set_text(ui_Label, buf);
   return SUCCESS;
 }
 

@@ -7,6 +7,8 @@ uint8_t max_temperature[3] = {0, 0, 0};
 uint8_t error[3] = {0, 0, 0};
 
 uint8_t power_48V = false;
+bool testing = false;
+//char buf[100];
 
 ESP32Flasher espflasher;
 
@@ -34,12 +36,13 @@ void check_params(){
         // error 0 bit - natezenie
         if (current[i] <= 0)
             error[i] |= (1 << 0);
+        else   
+            error[i] &= ~(1 << 0); 
     }
 }
 
 // Wypisywanie parametrow na ekranie
-void draw_params(){
-    char buf[10];
+void draw_params(){    
     // Kanal 1
     sprintf(buf, "%d", voltage[0]);
     lv_label_set_text(ui_V11, buf);
@@ -97,39 +100,80 @@ void set_channels_val(uint8_t VALUE){
 }
 
 // Procedura testowa
-void test_procedure(){
-    // halo esp32
-    // przekaznik
-    // helo ncl
+uint8_t test_procedure(){
+    // Flaga
+    testing = true;
+    // Odpytaj ESP o wersje programu NCL
+    uint8_t ver = 0;
+    I2CwriteREG(SLAVE_ADDR, REG_PROG_VER);
+    I2Cread(SLAVE_ADDR, &ver, 1);
+    // Blad espa
+    if (ver != PROG_VER)
+        return ESP_ERROR;
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+
+    // Wlacz przekaznik
+    digitalWrite(RELAY, HIGH);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    // Czy NCL odpowiada ? odczytaj 3 rejestry error i sprawdz czy = 0
+    uint8_t buf[3] = {0, 0, 0};
+    I2CwriteREG(SLAVE_ADDR, REG_CH1_ERROR);
+    I2Cread(SLAVE_ADDR, buf, 3);
+    // Blad NCLa
+    for(int i = 0; i < 3; i++){
+        if (buf[i] != 0)
+            return NCL_CH1_ERROR + i;
+    }
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     // Testowe prady
     set_current(TEST_CURRENT);
 
     // Po kolei 1 A
-    for(int i = 1; i <=3 ; i++){
-        set_channel_val(i, 100);
-        vTaskDelay(8000 / portTICK_PERIOD_MS);
-        set_channel_val(i, 0);
+    for(int i = 0; i < 3 ; i++){
+        set_channel_val(i+1, 100);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        // Blad
+        if (error[i] != 0)
+            return NCL_CH1_I_ERROR + i;
+        set_channel_val(i+1, 0);
     }
 
     // Po kolei 2.5 A
-    for(int i = 1; i <=3 ; i++){
-        set_channel_val(i, 250);
-        vTaskDelay(8000 / portTICK_PERIOD_MS);
-        set_channel_val(i, 0);
+    for(int i = 0; i < 3 ; i++){
+        set_channel_val(i+1, 250);
+        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        // Blad
+        if (error[i] != 0)
+            return NCL_CH1_I_ERROR + i;
+        set_channel_val(i+1, 0);
     }
 
     // Rozjasnienie od 1 A do 2.5 A wszytkich naraz
+    set_channels_val(100);
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
     for(int i = 100; i < 256; i++){
         set_channels_val(i);
         vTaskDelay(100 / portTICK_PERIOD_MS);
+        // Blad
+        for(int j = 0; j < 3; j++){
+            if (error[j] != 0)
+                return NCL_CH1_I_ERROR + j;
+        }
     }
 
     // Odczekanie
     vTaskDelay(10000 / portTICK_PERIOD_MS);
+    for(int i = 0; i < 3; i++){
+        if (error[i] != 0)
+        return NCL_CH1_I_ERROR + i;
+    }
 
     // Wyniki testów
-    digitalWrite(BUZZER , HIGH);
+    //digitalWrite(BUZZER , HIGH);
+    // Flaga
+    testing = false;
+    return SUCCESS;
 }
 
 // Wgrywanie programu NCL
@@ -145,11 +189,42 @@ void flash_programm(){
     // Programowanie slavea
     espflasher.espFlashBinFile("/firmware.bin");
     // Sygnal dzwiekowy
-    for (int i = 0; i < 5; i ++){
-        digitalWrite(BUZZER, HIGH);
-        vTaskDelay(200 / portTICK_PERIOD_MS);
-        digitalWrite(BUZZER, LOW);
-        vTaskDelay(200 / portTICK_PERIOD_MS);
-    }
+    // for (int i = 0; i < 5; i ++){
+    //     digitalWrite(BUZZER, HIGH);
+    //     vTaskDelay(200 / portTICK_PERIOD_MS);
+    //     digitalWrite(BUZZER, LOW);
+    //     vTaskDelay(200 / portTICK_PERIOD_MS);
+    // }
   }
+}
+
+// Wypisywanie errorw na ekranie
+void err_code_to_label(uint8_t err_code){
+    switch (err_code){
+    case SUCCESS:
+        sprintf(buf, "Ukonczono testy!");
+        break;
+    case ESP_ERROR:
+        sprintf(buf, "Brak komunikacji z ESP32");
+        break;
+    case NCL_CH1_ERROR:
+        sprintf(buf, "Brak komunikacji NCL (CH1)");
+        break;
+    case NCL_CH2_ERROR:
+        sprintf(buf, "Brak komunikacji NCL (CH2)");
+        break;
+    case NCL_CH3_ERROR:
+        sprintf(buf, "Brak komunikacji NCL (CH3)");
+        break;
+    case NCL_CH1_I_ERROR:
+        sprintf(buf, "Blad przetwornicy NCL (CH1)");
+        break;
+    case NCL_CH2_I_ERROR:
+        sprintf(buf, "Blad przetwornicy NCL (CH2)");
+        break;
+    case NCL_CH3_I_ERROR:
+        sprintf(buf, "Blad przetwornicy NCL (CH3)");
+        break;
+    }
+    lv_label_set_text(ui_Label, buf);
 }

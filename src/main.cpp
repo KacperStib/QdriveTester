@@ -25,11 +25,30 @@ void web_task(void *pvParameters){
 
 // Sprawdzenie działań
 void programm_task(void *pvParameters){
+    uint8_t err_code = 0;
     for(;;){
         // Flaga programowania
         if (p_start){
             flash_programm();
             p_start = false;
+        }
+        // Flaga testowania
+        if (t_start){
+            err_code = test_procedure();
+            // Wylacz przekaznik
+            digitalWrite(RELAY, LOW);
+            err_code_to_label(err_code);
+            t_start = false;
+        }
+        // Flaga programowania z testowaniem
+        if (pt_start){
+            flash_programm();
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+            err_code = test_procedure();
+            // Wylacz przekaznik
+            digitalWrite(RELAY, LOW);
+            err_code_to_label(err_code);
+            pt_start = false;
         }
         // Sprawdzenie seriala
         if (logSerial1) {
@@ -45,7 +64,7 @@ void programm_task(void *pvParameters){
 // Diagnostyka NCLa
 void diagnostic_task(void *pvParameters){
     for(;;){
-        if (diagnostic_sw){
+        if (diagnostic_sw || testing){
             //digitalWrite(RELAY, HIGH);
             read_params();
             check_params();

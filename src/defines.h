@@ -30,4 +30,4 @@
 #define REG_CH3_ERROR 31
 
 #define DEFAULT_CURRENT 40
-#define TEST_CURRENT 155
+#define TEST_CURRENT 10

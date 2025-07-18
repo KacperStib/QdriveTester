@@ -6,6 +6,8 @@
 #include <SPIFFS.h>
 #include "ui/ui.h"
 
+// Bufor do pisania na wyswietlaczau
+extern char buf[100];
 // Timeouts and retry parameters
 #define DEFAULT_TIMEOUT 1000              // Standard timeout for most operations (ms)
 #define DEFAULT_FLASH_TIMEOUT 3000        // Extended timeout for flash operations (ms)
