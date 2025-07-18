@@ -77,21 +77,12 @@ void draw_params(){
 
 // Ustaweienie maksymalnego pradu
 void set_current(uint8_t CURRENT){
-    // I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
-    // I2CwriteVAL(SLAVE_ADDR, REG_CH1_CURRENT, CURRENT);
-    // I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
-    // I2CwriteVAL(SLAVE_ADDR, REG_CH2_CURRENT, CURRENT);
-    // I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
-    // I2CwriteVAL(SLAVE_ADDR, REG_CH3_CURRENT, CURRENT);
-    Wire.beginTransmission(SLAVE_ADDR);
-    Wire.write(REG_MCU_COMMAND);
-    Wire.write(3);
-    Wire.write(REG_CH1_CURRENT);
-    Wire.write(CURRENT);
-    Wire.write(CURRENT);
-    Wire.write(CURRENT);
-    Wire.endTransmission();
-
+    I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
+    I2CwriteVAL(SLAVE_ADDR, REG_CH1_CURRENT, CURRENT);
+    I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
+    I2CwriteVAL(SLAVE_ADDR, REG_CH2_CURRENT, CURRENT);
+    I2CwriteVAL(SLAVE_ADDR, REG_MCU_COMMAND, 3);
+    I2CwriteVAL(SLAVE_ADDR, REG_CH3_CURRENT, CURRENT);
 }
 
 // Ustawienie wysterowania pojedynczego kanalu

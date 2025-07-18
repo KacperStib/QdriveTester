@@ -4,6 +4,7 @@
 #define BROADCAST_ADDR 0x00
 #define SLAVE_ADDR 0x03
 
+#define REG_PROG_VER 0
 #define REG_MCU_COMMAND 1
 
 #define REG_CH1_POWER 2
@@ -23,6 +24,10 @@
 #define REG_CH1_TLED 26
 #define REG_CH2_TLED 27
 #define REG_CH3_TLED 28
+
+#define REG_CH1_ERROR 29
+#define REG_CH2_ERROR 30
+#define REG_CH3_ERROR 31
 
 #define DEFAULT_CURRENT 40
 #define TEST_CURRENT 155

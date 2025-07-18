@@ -2,6 +2,8 @@
 #include <WebServer.h>
 #include "SPIFFS.h"
 
+#include "test.h"
+
 extern const char* ssid;
 extern const char* password;
 
@@ -15,3 +17,4 @@ void spiffs_setup();
 void upload_programm();
 void handleRoot();
 void handleToggleLogs();
+void handleFlash();

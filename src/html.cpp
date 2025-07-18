@@ -132,7 +132,7 @@ void wifi_setup(){
     server.on("/upload", HTTP_POST, []() {
         server.send(200);
     }, upload_programm);
-    //server.on("/flash", HTTP_GET, handleFlash);
+    server.on("/flash", HTTP_GET, handleFlash);
     server.on("/togglelogs", HTTP_GET, handleToggleLogs);
     server.begin();
     Serial.println("Serwer HTTP uruchomiony");
@@ -194,4 +194,9 @@ void handleToggleLogs() {
   } else {
     server.send(400, "text/plain", "Brak parametru");
   }
+}
+
+// Proramowanie z webservera (opcjonalne)
+void handleFlash(){
+  flash_programm();
 }

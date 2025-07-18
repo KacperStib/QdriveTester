@@ -10,7 +10,7 @@
 // Odswiezanie ekranu
 void screen_task(void *pvParameters){
     for(;;){
-        server.handleClient();
+        lv_timer_handler();
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -18,7 +18,7 @@ void screen_task(void *pvParameters){
 // Webserver
 void web_task(void *pvParameters){
     for(;;){
-        lv_timer_handler();
+        server.handleClient();
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -55,6 +55,7 @@ void diagnostic_task(void *pvParameters){
     }
 }
 
+// Manualne sterowanie 
 void manual_task(void *pvParameters){
     for (;;){
         // Przekaznik
