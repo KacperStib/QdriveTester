@@ -31,3 +31,5 @@
 
 #define DEFAULT_CURRENT 40
 #define TEST_CURRENT 10
+
+#define TEST_INTERVAL 2000

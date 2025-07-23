@@ -23,6 +23,7 @@ extern uint8_t error[3];
 
 extern uint8_t power_48V;
 extern bool testing;
+extern uint8_t testing_bar;
 //extern char buf[100];
 
 extern ESP32Flasher espflasher;

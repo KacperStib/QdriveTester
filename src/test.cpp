@@ -8,6 +8,7 @@ uint8_t error[3] = {0, 0, 0};
 
 uint8_t power_48V = false;
 bool testing = false;
+uint8_t testing_bar = 0;
 //char buf[100];
 
 ESP32Flasher espflasher;
@@ -103,6 +104,9 @@ void set_channels_val(uint8_t VALUE){
 uint8_t test_procedure(){
     // Flaga
     testing = true;
+    sprintf(buf, "Testowanie drivera");
+    lv_label_set_text(ui_Label, buf);
+    
     // Odpytaj ESP o wersje programu NCL
     uint8_t ver = 0;
     I2CwriteREG(SLAVE_ADDR, REG_PROG_VER);
@@ -132,7 +136,7 @@ uint8_t test_procedure(){
     // Po kolei 1 A
     for(int i = 0; i < 3 ; i++){
         set_channel_val(i+1, 100);
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
         // Blad
         if (error[i] != 0)
             return NCL_CH1_I_ERROR + i;
@@ -142,7 +146,7 @@ uint8_t test_procedure(){
     // Po kolei 2.5 A
     for(int i = 0; i < 3 ; i++){
         set_channel_val(i+1, 250);
-        vTaskDelay(5000 / portTICK_PERIOD_MS);
+        vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
         // Blad
         if (error[i] != 0)
             return NCL_CH1_I_ERROR + i;
@@ -163,16 +167,24 @@ uint8_t test_procedure(){
     }
 
     // Odczekanie
-    vTaskDelay(10000 / portTICK_PERIOD_MS);
+    vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
     for(int i = 0; i < 3; i++){
         if (error[i] != 0)
         return NCL_CH1_I_ERROR + i;
     }
 
-    // Wyniki testów
-    //digitalWrite(BUZZER , HIGH);
-    // Flaga
-    testing = false;
+    //Sygnal dzwiekowy
+    for (int i = 0; i < 1; i ++){
+        digitalWrite(BUZZER, HIGH);
+        vTaskDelay(200 / portTICK_PERIOD_MS);
+        digitalWrite(BUZZER, LOW);
+        vTaskDelay(800 / portTICK_PERIOD_MS);
+    }
+
+    // Ustawienie domyslnych pradow
+    set_current(DEFAULT_CURRENT);
+    set_channels_val(0);
+
     return SUCCESS;
 }
 
@@ -227,4 +239,9 @@ void err_code_to_label(uint8_t err_code){
         break;
     }
     lv_label_set_text(ui_Label, buf);
+    // Flaga
+    testing = false;
+    testing_bar = 0;
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    lv_bar_set_value(ui_ProgBar, testing_bar, LV_ANIM_OFF);
 }

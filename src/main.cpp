@@ -11,6 +11,12 @@
 void screen_task(void *pvParameters){
     for(;;){
         lv_timer_handler();
+        if (testing){
+            lv_bar_set_value(ui_ProgBar, testing_bar, LV_ANIM_OFF);
+            testing_bar ++;
+            if (testing_bar >= 100)
+                testing_bar = 0;
+        }      
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }

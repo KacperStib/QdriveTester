@@ -185,6 +185,7 @@ void ui_Prog_screen_init(void)
     lv_obj_set_y(ui_Label, 60);
     lv_obj_set_align(ui_Label, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label, "");
+    lv_obj_set_style_text_color(ui_Label, lv_color_hex(0xC21919), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_ParamsB, ui_event_ParamsB, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_PrognTestBut, ui_event_PrognTestBut, LV_EVENT_ALL, NULL);

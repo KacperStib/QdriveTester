@@ -833,6 +833,7 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
   Serial.println("================================================\n");
   // Wyswietlaccz
   sprintf(buf, "Pomyslnie zaprogramowano");
+  lv_bar_set_value(ui_ProgBar, 0, LV_ANIM_OFF);
   lv_label_set_text(ui_Label, buf);
   return SUCCESS;
 }
