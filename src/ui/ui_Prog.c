@@ -19,8 +19,11 @@ lv_obj_t * ui_TestBut = NULL;
 lv_obj_t * ui_ProgLabel = NULL;
 lv_obj_t * ui_TestLabel = NULL;
 lv_obj_t * ui_Label = NULL;
+lv_obj_t * ui_StopBut = NULL;
+lv_obj_t * ui_StopLabel = NULL;
 
 bool p_start = false, t_start = false, pt_start = false;
+volatile bool stop_req = false;
 // event funtions
 void ui_event_ParamsB(lv_event_t * e)
 {
@@ -67,6 +70,16 @@ void ui_event_TestBut(lv_event_t * e)
     if(event_code == LV_EVENT_CLICKED) {
         (e);
         t_start = true;
+    }
+}
+
+void ui_event_StopBut(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+
+    if(event_code == LV_EVENT_CLICKED) {
+        (e);
+        stop_req = true;
     }
 }
 
@@ -187,11 +200,31 @@ void ui_Prog_screen_init(void)
     lv_label_set_text(ui_Label, "");
     lv_obj_set_style_text_color(ui_Label, lv_color_hex(0xC21919), LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    ui_StopBut = lv_btn_create(ui_Prog);
+    lv_obj_set_width(ui_StopBut, 120);
+    lv_obj_set_height(ui_StopBut, 60);
+    lv_obj_set_x(ui_StopBut, 5);
+    lv_obj_set_y(ui_StopBut, 116);
+    lv_obj_set_align(ui_StopBut, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_StopBut, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
+    lv_obj_clear_flag(ui_StopBut, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_StopBut, lv_color_hex(0x9D0505), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_StopBut, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_StopLabel = lv_label_create(ui_Prog);
+    lv_obj_set_width(ui_StopLabel, LV_SIZE_CONTENT);   /// 2
+    lv_obj_set_height(ui_StopLabel, LV_SIZE_CONTENT);    /// 2
+    lv_obj_set_x(ui_StopLabel, 5);
+    lv_obj_set_y(ui_StopLabel, 116);
+    lv_obj_set_align(ui_StopLabel, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_StopLabel, "STOP");
+
     lv_obj_add_event_cb(ui_ParamsB, ui_event_ParamsB, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_PrognTestBut, ui_event_PrognTestBut, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ManualB, ui_event_ManualB, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_ProgBut, ui_event_ProgBut, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_TestBut, ui_event_TestBut, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_StopBut, ui_event_StopBut, LV_EVENT_ALL, NULL);
 
 }
 
@@ -214,5 +247,6 @@ void ui_Prog_screen_destroy(void)
     ui_ProgLabel = NULL;
     ui_TestLabel = NULL;
     ui_Label = NULL;
-
+    ui_StopBut = NULL;
+    ui_StopLabel = NULL;
 }

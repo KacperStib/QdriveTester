@@ -13,6 +13,14 @@ uint8_t testing_bar = 0;
 
 ESP32Flasher espflasher;
 
+// Odczyt temperatury esp32
+uint8_t read_esp32_temp(){
+    uint8_t esp32_temp = 0;
+    I2CwriteREG(SLAVE_ADDR, REG_ESP32_TEMP);
+    I2Cread(SLAVE_ADDR, &esp32_temp, 1);
+    return esp32_temp;
+}
+
 // Odczyt parametrow NCLi
 void read_params(){
     // pierwszy rejestr parametrow
@@ -34,11 +42,16 @@ void check_params(){
         // maksymalne temperatury
         if (max_temperature[i] < temperature[i])
             max_temperature[i] = temperature[i];
-        // error 0 bit - natezenie
+        // error 0 bit - natezenie < 0 - zwarcie itp.
         if (current[i] <= 0)
             error[i] |= (1 << 0);
         else   
-            error[i] &= ~(1 << 0); 
+            error[i] &= ~(1 << 0);
+        // error 1 bit - przegrzanie 
+        if (temperature[i] >= 85)
+            error[i] |= (1 << 1);
+        else   
+            error[i] &= ~(1 << 1);
     }
 }
 
@@ -114,11 +127,18 @@ uint8_t test_procedure(){
     // Blad espa
     if (ver != PROG_VER)
         return ESP_ERROR;
+    // Temperatura ESP po 15 sekundach
+    for(int i = 0; i < 15; i++){
+        if (read_esp32_temp() > 50)
+            return ESP_OVERHEAT;
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
     vTaskDelay(100 / portTICK_PERIOD_MS);
 
     // Wlacz przekaznik
     digitalWrite(RELAY, HIGH);
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
+    // vTaskDelay(2000 / portTICK_PERIOD_MS);
+    DELAY_WITH_CHECK(2000, NO_ERR_CHECK);
     // Czy NCL odpowiada ? odczytaj 3 rejestry error i sprawdz czy = 0
     uint8_t buf[3] = {0, 0, 0};
     I2CwriteREG(SLAVE_ADDR, REG_CH1_ERROR);
@@ -136,20 +156,16 @@ uint8_t test_procedure(){
     // Po kolei 1 A
     for(int i = 0; i < 3 ; i++){
         set_channel_val(i+1, 100);
-        vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
-        // Blad
-        if (error[i] != 0)
-            return NCL_CH1_I_ERROR + i;
+        // vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
+        DELAY_WITH_CHECK(TEST_INTERVAL, i);
         set_channel_val(i+1, 0);
     }
 
     // Po kolei 2.5 A
     for(int i = 0; i < 3 ; i++){
         set_channel_val(i+1, 250);
-        vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
-        // Blad
-        if (error[i] != 0)
-            return NCL_CH1_I_ERROR + i;
+        // vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
+        DELAY_WITH_CHECK(TEST_INTERVAL, i);
         set_channel_val(i+1, 0);
     }
 
@@ -158,20 +174,13 @@ uint8_t test_procedure(){
     vTaskDelay(2000 / portTICK_PERIOD_MS);
     for(int i = 100; i < 256; i++){
         set_channels_val(i);
+        CHECK_STOP();
         vTaskDelay(100 / portTICK_PERIOD_MS);
-        // Blad
-        for(int j = 0; j < 3; j++){
-            if (error[j] != 0)
-                return NCL_CH1_I_ERROR + j;
-        }
     }
 
     // Odczekanie
-    vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
-    for(int i = 0; i < 3; i++){
-        if (error[i] != 0)
-        return NCL_CH1_I_ERROR + i;
-    }
+    // vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
+    DELAY_WITH_CHECK(TEST_INTERVAL, NO_ERR_CHECK);
 
     //Sygnal dzwiekowy
     for (int i = 0; i < 1; i ++){
@@ -183,7 +192,6 @@ uint8_t test_procedure(){
 
     // Ustawienie domyslnych pradow
     set_current(DEFAULT_CURRENT);
-    set_channels_val(0);
 
     return SUCCESS;
 }
@@ -200,13 +208,6 @@ void flash_programm(){
     Serial.print("Connected to target\n");
     // Programowanie slavea
     espflasher.espFlashBinFile("/firmware.bin");
-    // Sygnal dzwiekowy
-    // for (int i = 0; i < 5; i ++){
-    //     digitalWrite(BUZZER, HIGH);
-    //     vTaskDelay(200 / portTICK_PERIOD_MS);
-    //     digitalWrite(BUZZER, LOW);
-    //     vTaskDelay(200 / portTICK_PERIOD_MS);
-    // }
   }
 }
 
@@ -218,6 +219,9 @@ void err_code_to_label(uint8_t err_code){
         break;
     case ESP_ERROR:
         sprintf(buf, "Brak komunikacji z ESP32");
+        break;
+    case ESP_OVERHEAT:
+        sprintf(buf, "Przgrzanie ESP32");
         break;
     case NCL_CH1_ERROR:
         sprintf(buf, "Brak komunikacji NCL (CH1)");
@@ -237,11 +241,25 @@ void err_code_to_label(uint8_t err_code){
     case NCL_CH3_I_ERROR:
         sprintf(buf, "Blad przetwornicy NCL (CH3)");
         break;
+    case NCL_CH1_T_ERROR:
+        sprintf(buf, "Przegrzanie (CH1)");
+        break;
+    case NCL_CH2_T_ERROR:
+        sprintf(buf, "Przegrzanie (CH2)");
+        break;
+    case NCL_CH3_T_ERROR:
+        sprintf(buf, "Przegrzanie (CH3)");
+        break;
+    case TEST_STOPPED:
+        sprintf(buf, "Przerwano wykonywanie testow");
+        stop_req = false;
+        break;
     }
     lv_label_set_text(ui_Label, buf);
     // Flaga
     testing = false;
     testing_bar = 0;
+    set_channels_val(0);
     vTaskDelay(100 / portTICK_PERIOD_MS);
     lv_bar_set_value(ui_ProgBar, testing_bar, LV_ANIM_OFF);
 }

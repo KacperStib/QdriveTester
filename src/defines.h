@@ -15,6 +15,8 @@
 #define REG_CH2_CURRENT 6
 #define REG_CH3_CURRENT 7
 
+#define REG_ESP32_TEMP 14
+
 #define REG_CH1_VLED 20
 #define REG_CH2_VLED 21
 #define REG_CH3_VLED 22
@@ -29,7 +31,7 @@
 #define REG_CH2_ERROR 30
 #define REG_CH3_ERROR 31
 
-#define DEFAULT_CURRENT 40
+#define DEFAULT_CURRENT 10
 #define TEST_CURRENT 10
 
-#define TEST_INTERVAL 2000
+#define TEST_INTERVAL 5000

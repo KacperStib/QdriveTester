@@ -80,19 +80,19 @@ String html = R"rawliteral(
 </head>
 <body>
   <div class="card">
-    <h1>ESP32 Flasher</h1>
+    <h1>QDrive Tester</h1>
     
     <div class="form-group">
-      <h3>Upload Firmware</h3>
+      <h3>Wgraj program NCL</h3>
       <form method='POST' action='/upload' enctype='multipart/form-data'>
         <input type='file' name='plik'><br><br>
-        <input type='submit' value='Upload'>
+        <input type='submit' value='Wgraj'>
       </form>
     </div>
     
     <div class="form-group">
-      <h3>Flash ESP32</h3>
-      <a href='/flash' class='btn'>Start Flashing</a>
+      <h3>Zaprogramuj driver</h3>
+      <a href='/flash' class='btn'>Programuj</a>
     </div>
     
     <div class="checkbox-container">

@@ -32,8 +32,12 @@ extern lv_obj_t * ui_TestBut;
 extern lv_obj_t * ui_ProgLabel;
 extern lv_obj_t * ui_TestLabel;
 extern lv_obj_t * ui_Label;
+extern void ui_event_StopBut(lv_event_t * e);
+extern lv_obj_t * ui_StopBut;
+extern lv_obj_t * ui_StopLabel;
 // CUSTOM VARIABLES
 extern bool p_start, t_start, pt_start;
+extern volatile bool stop_req;
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

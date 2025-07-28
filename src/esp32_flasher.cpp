@@ -826,6 +826,8 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
       lv_bar_set_value(ui_ProgBar, progress, LV_ANIM_OFF);
       sprintf(buf, "Postep programowania: %d %", progress);
       lv_label_set_text(ui_Label, buf);
+      // Przycisk stop
+     // CHECK_STOP();
     }
   }
 
