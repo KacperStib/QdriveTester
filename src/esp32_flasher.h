@@ -5,7 +5,7 @@
 #include "Arduino.h"
 #include <SPIFFS.h>
 #include "ui/ui.h"
-//#include "test.h"
+#include "test.h"
 
 // Bufor do pisania na wyswietlaczau
 extern char buf[100];

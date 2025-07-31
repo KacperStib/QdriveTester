@@ -161,18 +161,18 @@ uint8_t test_procedure(){
         set_channel_val(i+1, 0);
     }
 
-    // Po kolei 2.5 A
+    // Po kolei 2 A
     for(int i = 0; i < 3 ; i++){
-        set_channel_val(i+1, 250);
+        set_channel_val(i+1, 200);
         // vTaskDelay(TEST_INTERVAL / portTICK_PERIOD_MS);
         DELAY_WITH_CHECK(TEST_INTERVAL, i);
         set_channel_val(i+1, 0);
     }
 
-    // Rozjasnienie od 1 A do 2.5 A wszytkich naraz
+    // Rozjasnienie od 1 A do 2 A wszytkich naraz
     set_channels_val(100);
     vTaskDelay(2000 / portTICK_PERIOD_MS);
-    for(int i = 100; i < 256; i++){
+    for(int i = 100; i < 200; i++){
         set_channels_val(i);
         CHECK_STOP();
         vTaskDelay(100 / portTICK_PERIOD_MS);

@@ -27,8 +27,8 @@
 #define NO_ERR_CHECK 5
 #define DELAY_WITH_CHECK(ms, ch) \
     do { \
-        vTaskDelay(3000 / portTICK_PERIOD_MS); \
-        int elapsed = 3000; \
+        vTaskDelay(2000 / portTICK_PERIOD_MS); \
+        int elapsed = 2000; \
         while (elapsed < ms) { \
             if (stop_req) return TEST_STOPPED; \
             if (ch < 3) {if(error[ch] & (1 << 0)) return NCL_CH1_I_ERROR + ch; if (error[ch] & (1 << 1)) return NCL_CH1_T_ERROR + ch;} \
@@ -49,6 +49,7 @@ extern bool testing;
 extern uint8_t testing_bar;
 //extern char buf[100];
 
+class ESP32Flasher;
 extern ESP32Flasher espflasher;
 
 uint8_t read_esp32_temp();

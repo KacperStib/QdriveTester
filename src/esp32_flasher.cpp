@@ -741,7 +741,14 @@ void ESP32Flasher::espFlashBinFile(const char* bin_file_name) {
 
     if (size <= ESP_FLASH_MAX_SIZE) {
       Serial.println("[INFO] File size within valid range");
-      flashBinary(file_read, size, ESP_FLASH_OFFSET);
+      if (flashBinary(file_read, size, ESP_FLASH_OFFSET) == TEST_STOPPED){
+        stop_req = false;
+        sprintf(buf, "Przerwano programowanie");
+        lv_label_set_text(ui_Label, buf);
+        testing_bar = 0;
+        vTaskDelay(100 / portTICK_PERIOD_MS);
+        lv_bar_set_value(ui_ProgBar, testing_bar, LV_ANIM_OFF);
+      }
     } else {
       Serial.printf("[ERROR] File size %d exceeds maximum flash size %d\n",
                     size, ESP_FLASH_MAX_SIZE);
@@ -827,7 +834,7 @@ int ESP32Flasher::flashBinary(File& file, uint32_t size, uint32_t address) {
       sprintf(buf, "Postep programowania: %d %", progress);
       lv_label_set_text(ui_Label, buf);
       // Przycisk stop
-     // CHECK_STOP();
+      CHECK_STOP();
     }
   }
 
