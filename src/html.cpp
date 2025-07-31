@@ -200,3 +200,31 @@ void handleToggleLogs() {
 void handleFlash(){
   flash_programm();
 }
+
+// Aktualizacja poprzez WiFi
+void setupOTA() {
+  ArduinoOTA.onStart([]() {
+    String type = (ArduinoOTA.getCommand() == U_FLASH) ? "flash" : "filesystem";
+    Serial.println("Rozpoczęto aktualizację: " + type);
+  });
+
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nAktualizacja zakończona!");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Postęp: %u%%\r", (progress * 100) / total);
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Błąd [%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Błąd autoryzacji");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Błąd inicjalizacji");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Błąd połączenia");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Błąd odbioru");
+    else if (error == OTA_END_ERROR) Serial.println("Błąd zakończenia");
+  });
+
+  ArduinoOTA.begin();
+  Serial.println("OTA gotowe, czekam na aktualizacje...");
+}

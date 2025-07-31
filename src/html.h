@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include "SPIFFS.h"
+#include <ArduinoOTA.h>
 
 #include "test.h"
 
@@ -18,3 +19,4 @@ void upload_programm();
 void handleRoot();
 void handleToggleLogs();
 void handleFlash();
+void setupOTA();

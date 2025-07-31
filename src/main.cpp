@@ -25,6 +25,7 @@ void screen_task(void *pvParameters){
 void web_task(void *pvParameters){
     for(;;){
         server.handleClient();
+        ArduinoOTA.handle();
         vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
@@ -124,6 +125,8 @@ void setup(){
     // Inicjalizacja WiFi
     wifi_setup();
     spiffs_setup();
+    // Konfiguracja OTA
+    setupOTA();
     // Inicjalizacja UART do flashowania
     espflasher.espFlasherInit();
     // Inicjalizacja I2C
